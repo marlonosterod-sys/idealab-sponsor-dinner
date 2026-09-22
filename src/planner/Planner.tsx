@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as RPE } from 'react'
 import { useData } from '../lib/data'
 import type { FloorVariant } from '../lib/types'
-import { CATS, chairs, CHAIR, DEF, DEFS, EMPTY, footprint, seatsOf, ZONE_COLORS, type PlanState, type Placed, type Zone } from './elements'
+import { bodyPoly, CATS, chairs, CHAIR, DEF, DEFS, EMPTY, footprint, seatsOf, ZONE_COLORS, type PlanState, type Placed, type Zone } from './elements'
 import { hitsWall, MARKERS, polyDist, ROOMS, VIEWBOX } from './geometry'
 import { buildPreset, PRESETS } from './presets'
 import { Modal } from '../ui'
@@ -209,6 +209,8 @@ export default function Planner() {
     for (let i = 0; i < tables.length; i++) for (let j = i + 1; j < tables.length; j++) {
       const A = tables[i], B = tables[j]
       if (Math.hypot(A.x - B.x, A.y - B.y) > 7) continue
+      // Zusammengeschobene Tische (Tafel) sind kein Durchgang
+      if (polyDist(bodyPoly(A), bodyPoly(B)).d < 0.08) continue
       const r = polyDist(fps.get(A.uid)!, fps.get(B.uid)!)
       if (r.d < 0.9) gaps.push({ a: A.uid, b: B.uid, d: r.d, p: r.p, q: r.q })
     }
